@@ -1,0 +1,33 @@
+{
+  "project": "Bean Leaf Disease Classification",
+  "input_size": [
+    224,
+    224
+  ],
+  "classes": [
+    "angular_leaf_spot",
+    "bean_rust",
+    "healthy"
+  ],
+  "model_files": {
+    "EfficientNetB0": "efficientnetb0.keras",
+    "DenseNet121": "densenet121.keras"
+  },
+  "tensorflow_version": "2.21.0",
+  "seed": 42,
+  "training_epochs": {
+    "EfficientNetB0": {
+      "Head_Training_Epochs": 10,
+      "Fine_Tuning_Epochs": 6
+    },
+    "DenseNet121": {
+      "Head_Training_Epochs": 10,
+      "Fine_Tuning_Epochs": 6
+    }
+  },
+  "training_time_seconds": {
+    "EfficientNetB0": 184.0000448190001,
+    "DenseNet121": 302.3569639750001
+  },
+  "note": "Raw RGB input in 0..255 range. Preprocessing is included in each saved model."
+}

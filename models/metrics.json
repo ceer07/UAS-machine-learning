@@ -1,0 +1,24 @@
+[
+  {
+    "Model": "EfficientNetB0",
+    "Precision_Macro": 0.92002442002442,
+    "Recall_Macro": 0.9066076042820228,
+    "Accuracy": 0.90625,
+    "F1_Macro": 0.906569453937875,
+    "Training_Time_Seconds": 184.0000448190001,
+    "Parameters": 4053414,
+    "Head_Training_Epochs": 10,
+    "Fine_Tuning_Epochs": 6
+  },
+  {
+    "Model": "DenseNet121",
+    "Precision_Macro": 0.8797341158685695,
+    "Recall_Macro": 0.8757844222960501,
+    "Accuracy": 0.875,
+    "F1_Macro": 0.8724295860727644,
+    "Training_Time_Seconds": 302.3569639750001,
+    "Parameters": 7040579,
+    "Head_Training_Epochs": 10,
+    "Fine_Tuning_Epochs": 6
+  }
+]

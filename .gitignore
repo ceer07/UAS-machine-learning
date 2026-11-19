@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+venv/
+.venv/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS
+.DS_Store
+
+# Dataset mentah (tidak perlu ikut di-push, hanya model hasil training yang dipakai app)
+data/
+*.zip
+!bean_leaf_models_bundle.zip
