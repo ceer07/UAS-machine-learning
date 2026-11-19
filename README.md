@@ -1,11 +1,8 @@
-# 🌱 Klasifikasi Penyakit Daun Kacang
+# 🌱 Klasifikasi Penyakit Daun Kacang — Panduan Menjalankan di Lokal
 
 Aplikasi web untuk mengklasifikasikan daun kacang ke dalam tiga kelas —
-`angular_leaf_spot`, `bean_rust`, `healthy` — menggunakan transfer learning
-EfficientNetB0 dan DenseNet121 (dataset [Beans, Makerere AI Lab](https://github.com/AI-Lab-Makerere/ibean)).
-
-Notebook training ada di `notebooks/Klasifikasi_Penyakit_Daun_Kacang.ipynb`.
-Aplikasi frontend dibangun dengan [Streamlit](https://streamlit.io).
+`angular_leaf_spot`, `bean_rust`, `healthy` — menggunakan model transfer
+learning EfficientNetB0 dan DenseNet121, dengan frontend [Streamlit](https://streamlit.io).
 
 ## Struktur proyek
 
@@ -13,98 +10,92 @@ Aplikasi frontend dibangun dengan [Streamlit](https://streamlit.io).
 bean-leaf-classifier/
 ├── app.py                 # Aplikasi Streamlit (frontend + inference)
 ├── requirements.txt       # Dependensi Python
-├── .gitignore
-├── README.md
 ├── notebooks/
 │   └── Klasifikasi_Penyakit_Daun_Kacang.ipynb
-└── models/                 # Diisi manual, lihat langkah 2 di bawah
+└── models/                 # Harus diisi manual (lihat langkah 2)
     ├── efficientnetb0.keras
     ├── densenet121.keras
-    ├── class_names.json
-    ├── metrics.json
-    └── model_manifest.json
+    └── class_names.json
 ```
 
-## 1. Jalankan notebook training
+## Prasyarat
 
-Buka notebook di Google Colab (GPU T4 disarankan), jalankan sampai selesai.
-Di akhir notebook akan ter-download `bean_leaf_models_bundle.zip`.
+- **Python 3.11 atau 3.12** (TensorFlow belum mendukung Python 3.13 ke atas).
+  Cek versi Python Anda dengan:
+  ```
+  python --version
+  ```
+  Jika Python 3.13+, install Python 3.11/3.12 dari [python.org](https://www.python.org/downloads/windows/)
+  tanpa perlu menghapus versi yang sudah ada (bisa berdampingan).
 
-## 2. Siapkan folder `models/`
+## Langkah 1 — Jalankan notebook training (jika belum punya model)
 
-Ekstrak isi `bean_leaf_models_bundle.zip` ke folder `models/` di project ini.
-**Jangan ubah nama file** — `app.py` memuat file dengan nama persis:
+Buka `notebooks/Klasifikasi_Penyakit_Daun_Kacang.ipynb` di Google Colab
+(disarankan pakai GPU T4), jalankan semua cell sampai selesai. Di akhir
+notebook akan ter-download `bean_leaf_models_bundle.zip`.
+
+## Langkah 2 — Taruh model ke folder `models/`
+
+Ekstrak isi `bean_leaf_models_bundle.zip` ke folder `models/` pada project
+ini. **Jangan ubah nama file** — `app.py` memuat file dengan nama persis:
 `efficientnetb0.keras`, `densenet121.keras`, `class_names.json`.
 
-## 3. Jalankan lokal (opsional, untuk tes sebelum deploy)
+## Langkah 3 — Buat virtual environment
+
+Dari folder root project, jalankan:
 
 ```bash
-python -m venv venv
-source venv/bin/activate        # Windows: venv\Scripts\activate
+# Jika punya beberapa versi Python di Windows, pilih versi spesifik:
+py -3.12 -m venv venv
+
+# Aktifkan venv
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS/Linux
+```
+
+Pastikan prompt terminal menampilkan `(venv)` di depan, dan `python --version`
+menunjukkan 3.11.x atau 3.12.x.
+
+## Langkah 4 — Install dependensi
+
+```bash
+pip install --upgrade pip
 pip install -r requirements.txt
+```
+
+Isi `requirements.txt` yang sudah teruji kompatibel:
+
+```
+streamlit==1.39.0
+tensorflow==2.17.0
+pillow==10.4.0
+numpy==1.26.4
+pyarrow==15.0.2
+```
+
+> Catatan: `numpy` sengaja tetap di versi 1.x karena TensorFlow 2.17.0 belum
+> mendukung NumPy 2.0, dan `pyarrow` di-pin ke 15.0.2 agar tetap kompatibel
+> dengan NumPy 1.x (versi `pyarrow` terbaru mewajibkan NumPy ≥2.0).
+
+## Langkah 5 — Jalankan aplikasi
+
+```bash
 streamlit run app.py
 ```
 
-Buka `http://localhost:8501` di browser.
+Browser akan otomatis terbuka ke `http://localhost:8501`. Upload gambar daun
+kacang (.jpg/.jpeg/.png), pilih arsitektur model di sidebar, dan lihat hasil
+prediksi beserta grafik probabilitas tiap kelas.
 
-## 4. Push ke GitHub
+## Troubleshooting umum
 
-```bash
-git init
-git add .
-git commit -m "Initial commit: bean leaf disease classifier"
-git branch -M main
-git remote add origin https://github.com/<username>/<repo-name>.git
-git push -u origin main
-```
-
-### ⚠️ Model besar → gunakan Git LFS
-
-File `.keras` biasanya berukuran puluhan MB. GitHub menolak file di atas
-100 MB dan akan memperingatkan di atas 50 MB. Jika model Anda mendekati
-batas itu, aktifkan Git LFS **sebelum** commit model:
-
-```bash
-git lfs install
-git lfs track "models/*.keras"
-git add .gitattributes
-git add models/*.keras
-git commit -m "Track model files with Git LFS"
-```
-
-Alternatif lain: upload model ke [Hugging Face Hub](https://huggingface.co/models)
-atau Google Drive, lalu modifikasi `app.py` agar men-download model saat
-pertama kali dijalankan (menggunakan `huggingface_hub.hf_hub_download` atau
-`gdown`), sehingga model tidak perlu ikut masuk ke repo GitHub sama sekali.
-Ini juga membantu kalau repo jadi terlalu besar untuk free tier Streamlit Cloud.
-
-## 5. Deploy ke Streamlit Community Cloud
-
-1. Buka [share.streamlit.io](https://share.streamlit.io) dan login dengan akun GitHub.
-2. Klik **New app** → pilih repository dan branch (`main`).
-3. Isi **Main file path**: `app.py`.
-4. Klik **Deploy**.
-
-Build pertama akan memakan waktu beberapa menit karena menginstall TensorFlow.
-
-### Catatan keterbatasan resource (free tier)
-
-Free tier Streamlit Community Cloud punya batas RAM ~1 GB. Memuat dua model
-TensorFlow (EfficientNetB0 + DenseNet121) sekaligus bisa berat. Beberapa opsi
-jika aplikasi lambat/crash:
-
-- Muat model hanya saat dipilih di dropdown (`app.py` sudah melakukan ini
-  lewat `st.cache_resource`, jadi model yang tidak dipilih tidak ikut dimuat).
-- Gunakan `tensorflow-cpu` (lebih ringan dari `tensorflow` penuh) — sudah
-  diset di `requirements.txt`.
-- Konversi model ke TensorFlow Lite (`.tflite`) untuk inference yang lebih
-  ringan, jika performa masih jadi masalah.
-
-## Model & Metrik
-
-Lihat `models/metrics.json` dan `models/model_comparison.csv` (hasil dari
-notebook) untuk perbandingan akurasi, precision, recall, F1 antara
-EfficientNetB0 dan DenseNet121.
+| Error | Penyebab | Solusi |
+|---|---|---|
+| `No matching distribution found for tensorflow==2.17.0` | Versi Python tidak didukung TensorFlow (mis. 3.13+) | Gunakan Python 3.11/3.12 (lihat Prasyarat) |
+| `ImageMixin.image() got an unexpected keyword argument 'use_container_width'` | Versi Streamlit terpasang lebih lama dari yang mendukung parameter ini | Pastikan `app.py` memakai `use_column_width=True`, bukan `use_container_width=True` |
+| `ImportError: pyarrow requires NumPy 2.0 or newer, found 1.26.4` | Versi `pyarrow` terbaru butuh NumPy 2.0+, padahal TensorFlow 2.17.0 belum mendukung NumPy 2.0 | Pin `pyarrow==15.0.2` di `requirements.txt` (bukan menaikkan NumPy) |
+| `Cannot install numpy==2.0.2 and tensorflow-intel==2.17.0 because these package versions have conflicting dependencies` | Mencoba memaksa NumPy 2.0 padahal TensorFlow 2.17.0 memerlukan NumPy <2.0 | Kembalikan `numpy==1.26.4`, atasi konflik `pyarrow` seperti baris di atas |
+| Model error / file not found di folder `models/` | File `.keras` belum ditaruh atau nama file salah | Ulangi Langkah 2, pastikan nama file persis sesuai yang dimuat `app.py` |
 
 ## Sitasi dataset
 
